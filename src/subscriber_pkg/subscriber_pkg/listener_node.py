@@ -19,6 +19,9 @@ class ListenerNode(Node):
             f'Received from "{msg.sender}" (#{msg.count}): {msg.message}'
         )
 
+        if msg.count == 3:
+            raise Exception('Simulated error after receiving 3 messages')
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -29,7 +32,8 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':

@@ -11,5 +11,7 @@ def generate_launch_description():
         Node(
             package='subscriber_pkg',
             executable='listener_node',
+            respawn=True,
+            respawn_delay=2.0,
         ),
     ])
