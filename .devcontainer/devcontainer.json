@@ -1,0 +1,21 @@
+{
+  "name": "ROS2 Humble",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder}/ros2_ws,target=/ros2_ws,type=bind",
+  "workspaceFolder": "/ros2_ws",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-iot.vscode-ros"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "ros.distro": "humble"
+      }
+    }
+  },
+  "postCreateCommand": "rosdep update && rosdep install --from-paths src --ignore-src -r -y"
+}
