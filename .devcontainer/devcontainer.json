@@ -3,8 +3,8 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "workspaceMount": "source=${localWorkspaceFolder}/ros2_ws,target=/ros2_ws,type=bind",
-  "workspaceFolder": "/ros2_ws",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/repo_root,type=bind",
+  "workspaceFolder": "/repo_root",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -13,9 +13,10 @@
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/bin/python3",
-        "ros.distro": "humble"
+        "ros.distro": "humble",
+        "terminal.integrated.cwd": "/repo_root/ros2_ws"
       }
     }
   },
-  "postCreateCommand": "rosdep update && rosdep install --from-paths src --ignore-src -r -y"
+  "postCreateCommand": "rosdep update && rosdep install --from-paths repo_root/ros2_ws/src --ignore-src -r -y"
 }
