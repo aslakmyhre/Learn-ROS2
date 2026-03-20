@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     ros-humble-rclpy \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install paho-mqtt python-dotenv
+
 # Create workspace
 RUN mkdir -p /ros2_ws/src
 WORKDIR /ros2_ws

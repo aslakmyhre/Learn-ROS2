@@ -1,0 +1,28 @@
+from setuptools import setup, find_packages
+
+package_name = 'ros_mqtt_bridge'
+
+setup(
+    name=package_name,
+    version='0.0.1',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml', '.env']),
+        ('share/' + package_name + '/launch', ['launch/all_nodes.launch.py']),
+    ],
+    install_requires=['setuptools', 'paho-mqtt', 'python-dotenv'],
+    zip_safe=True,
+    author='User',
+    author_email='user@example.com',
+    maintainer='User',
+    maintainer_email='user@example.com',
+    description='A minimal ROS 2 package for MQTT bridge functionality',
+    license='Apache-2.0',
+    entry_points={
+        'console_scripts': [
+            # 'ros_mqtt_bridge' blir navnet du bruker etter `ros2 run ros_mqtt_bridge ros_mqtt_bridge`
+            'ros_mqtt_bridge = ros_mqtt_bridge.node:main',
+        ],
+    },
+)
