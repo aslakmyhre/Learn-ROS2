@@ -18,5 +18,6 @@
       }
     }
   },
-  "postCreateCommand": "rosdep update && rosdep install --from-paths repo_root/ros2_ws/src --ignore-src -r -y"
+  "postCreateCommand": "rosdep update && rosdep install --from-paths repo_root/ros2_ws/src --ignore-src -r -y",
+  "runArgs": ["--network=host"]
 }

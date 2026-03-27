@@ -1,17 +1,18 @@
-# ROS2 Basic Example
+# ROS2 MQTT Bridge
 
-A learning project demonstrating ROS2 publisher-subscriber communication with custom messages and node auto-respawn.
+A ROS2 workspace demonstrating mock sensor nodes and an MQTT bridge for publishing sensor data to an MQTT broker.
 
 ## What it does
 
-- A **publisher** (`greeter_node`) publishes `Greeting` messages on the `/greetings` topic at 1 Hz
-- A **subscriber** (`listener_node`) receives messages and intentionally crashes after 3 messages
-- The **bringup** launch file starts both nodes and auto-respawns the subscriber when it crashes
+- **`mock_gps`** - Publishes GPS location and heading data on ROS2 topics
+- **`mock_system`** - Publishes system status data on ROS2 topics
+- **`ros_mqtt_bridge`** - Subscribes to ROS2 topics and publishes serialized protobuf messages to an MQTT broker
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- An MQTT broker (e.g., Mosquitto) running locally or accessible from the container
 
 ## Getting started
 
@@ -19,17 +20,17 @@ A learning project demonstrating ROS2 publisher-subscriber communication with cu
 
 Open the project in VS Code and click **Reopen in Container** when prompted (or run `Dev Containers: Reopen in Container` from the command palette).
 
-The container will automatically run:
+The container will automatically:
+- Mount the project to `/repo_root`
+- Set working directory to `/repo_root/ros2_ws`
+- Run `rosdep update && rosdep install --from-paths ros2_ws/src --ignore-src -r -y`
+- Source ROS2 Humble in your bash sessions
+
+### 2. Build the workspace
 
 ```bash
-rosdep update && rosdep install --from-paths ros2_ws/src --ignore-src -r -y
-```
-
-### 2. Build
-
-```bash
-# In ros2_ws
-colcon build --symlink-install
+# Terminal starts in /repo_root/ros2_ws
+colcon build
 ```
 
 ### 3. Source the workspace
@@ -38,55 +39,76 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-### 4. Run
+> **Note:** ROS2 Humble is already sourced via `.bashrc`. You only need to source the workspace overlay.
 
-Launch all nodes at once:
+### 4. Run the nodes
+
+**Launch all nodes at once** (recommended):
 
 ```bash
-ros2 launch robot_bringup all_nodes.launch.py
+ros2 launch ros_mqtt_bridge all_nodes.launch.py
 ```
 
-Or run nodes individually in separate terminals (each sourced):
+**Or run nodes individually** in separate terminals (each sourced):
 
 ```bash
 # Terminal 1
-ros2 run publisher_pkg greeter_node
+ros2 run mock_gps mock_gps
 
 # Terminal 2
-ros2 run subscriber_pkg listener_node
+ros2 run mock_system mock_system
+
+# Terminal 3
+ros2 run ros_mqtt_bridge ros_mqtt_bridge
 ```
 
 ## Packages
 
 | Package | Type | Description |
 |---------|------|-------------|
-| `my_interfaces` | CMake | Custom `Greeting.msg` message definition |
-| `publisher_pkg` | Python | Publishes greeting messages at 1 Hz |
-| `subscriber_pkg` | Python | Subscribes to greetings, crashes after 3 messages |
-| `robot_bringup` | Python | Launch file that starts everything with auto-respawn |
+| `mock_gps` | Python | Mock GPS node publishing location and heading |
+| `mock_system` | Python | Mock system node publishing system status |
+| `ros_mqtt_bridge` | Python | Bridge that subscribes to ROS2 topics and publishes to MQTT |
 
-## Custom message
+## Configuration
 
-See [`ros2_ws/src/my_interfaces/msg/Greeting.msg`](ros2_ws/src/my_interfaces/msg/Greeting.msg).
+The MQTT bridge can be configured via environment variables or a `.env` file in `ros2_ws/src/ros_mqtt_bridge/`:
+
+- `MQTT_HOST` - MQTT broker host (default: `localhost`)
+- `MQTT_PORT` - MQTT broker port (default: `1883`)
+
+For macOS hosts, set `MQTT_HOST=host.docker.internal` to reach a broker running on the host.
+
+## Inspecting ROS2 topics
+
+```bash
+# List all topics
+ros2 topic list
+
+# Echo messages from a specific topic
+ros2 topic echo /gps/location
+ros2 topic echo /system/status
+```
+
+## Inspecting MQTT messages
+
+If you have an MQTT broker running and `mosquitto_sub` installed:
+
+```bash
+mosquitto_sub -h localhost -t "marinor/#" -v
+```
 
 ## Cleaning the workspace
 
-There is no built-in `colcon clean` command, but you can install the `colcon-clean` plugin:
-
-```bash
-pip install colcon-clean
-colcon clean workspace
-```
-
-Or just remove the directories manually:
+Remove build artifacts manually:
 
 ```bash
 rm -rf build install log
 ```
 
-## Inspecting topics
+Or install the `colcon-clean` plugin:
 
 ```bash
-ros2 topic list
-ros2 topic echo /greetings
+pip install colcon-clean
+colcon clean workspace
 ```
